@@ -1,27 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Ip,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  @HttpCode(201)
-  create(@Body() createUserDto: CreateUserDto, @Ip() ip: string) {
-    return this.usersService.create(createUserDto, ip);
-  }
 
   @Get()
   findAll() {

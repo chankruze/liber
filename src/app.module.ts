@@ -6,10 +6,17 @@ import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { DbModule } from './db/db.module';
+import { HandlesModule } from './handles/handles.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), DbModule, UsersModule, AuthModule],
+  imports: [
+    ConfigModule.forRoot(),
+    DbModule,
+    UsersModule,
+    AuthModule,
+    HandlesModule,
+  ],
   controllers: [AppController],
   providers: [
     {

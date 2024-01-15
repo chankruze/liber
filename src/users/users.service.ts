@@ -31,6 +31,7 @@ export class UsersService {
     const passwordHash = await bcrypt.hash(createUserDto.password, 12);
 
     const newUser = await this.db.collection(this.USERS_COLLECTION).insertOne({
+      handle: createUserDto.handle,
       name: createUserDto.name,
       email,
       password: passwordHash,
@@ -58,6 +59,12 @@ export class UsersService {
   async findByEmail(email: string) {
     return await this.db.collection(this.USERS_COLLECTION).findOne({
       email,
+    });
+  }
+
+  async findByHandle(handle: string) {
+    return await this.db.collection(this.USERS_COLLECTION).findOne({
+      handle,
     });
   }
 
