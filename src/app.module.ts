@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { DbModule } from './db/db.module';
+import { FoldersModule } from './folders/folders.module';
 import { HandlesModule } from './handles/handles.module';
 import { UsersModule } from './users/users.module';
 
@@ -16,6 +17,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     HandlesModule,
+    FoldersModule,
   ],
   controllers: [AppController],
   providers: [

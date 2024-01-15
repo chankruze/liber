@@ -37,6 +37,7 @@ export class UsersService {
       password: passwordHash,
       ip,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     if (newUser.acknowledged) {
@@ -74,7 +75,7 @@ export class UsersService {
         .collection(this.USERS_COLLECTION)
         .findOneAndUpdate(
           { _id: new ObjectId(id) },
-          { $set: { ...updateUserDto } },
+          { $set: { ...updateUserDto, updatedAt: new Date() } },
           { returnDocument: 'after' },
         );
 
