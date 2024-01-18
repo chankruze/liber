@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -44,7 +45,7 @@ export class UsersService {
       return { ok: true, _id: newUser.insertedId };
     }
 
-    throw new ConflictException('Unable to create a user');
+    throw new InternalServerErrorException('Unable to create a user');
   }
 
   async findAll() {

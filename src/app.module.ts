@@ -9,6 +9,7 @@ import { DbModule } from './db/db.module';
 import { FoldersModule } from './folders/folders.module';
 import { HandlesModule } from './handles/handles.module';
 import { UsersModule } from './users/users.module';
+import { LinksModule } from './links/links.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     HandlesModule,
     FoldersModule,
+    LinksModule,
   ],
   controllers: [AppController],
   providers: [
