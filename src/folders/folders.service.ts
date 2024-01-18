@@ -13,14 +13,15 @@ export class FoldersService {
 
   constructor(@Inject('MONGO_DB') private readonly db: Db) {}
 
-  async create(createFolderDto: CreateFolderDto) {
-    // TODO: 0. add owner info
+  async create(createFolderDto: CreateFolderDto, ownerId: string) {
+    // TODO: 1. add check for duplicate folder name (allow only unique)
     // TODO: 1. handle DNS timeout exception
     // TODO: 2. handle read concern error
     const newFolder = await this.db
       .collection(this.FOLDERS_COLLECTION)
       .insertOne({
         ...createFolderDto,
+        ownerId: new ObjectId(ownerId),
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -87,4 +88,8 @@ export class FoldersService {
       });
     }
   }
+
+  /**
+   * TODO: user specific actions
+   */
 }

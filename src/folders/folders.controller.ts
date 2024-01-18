@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto } from './dto/update-folder.dto';
@@ -16,8 +17,11 @@ export class FoldersController {
   constructor(private readonly foldersService: FoldersService) {}
 
   @Post()
-  create(@Body() createFolderDto: CreateFolderDto) {
-    return this.foldersService.create(createFolderDto);
+  create(@Body() createFolderDto: CreateFolderDto, @Req() request: Request) {
+    // TODO: check the db if the user exists
+    // TODO: if the user exists then proceed
+    const ownerId = request['user'].sub;
+    return this.foldersService.create(createFolderDto, ownerId);
   }
 
   @Get()
