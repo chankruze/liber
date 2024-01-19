@@ -41,4 +41,13 @@ export class LinksController {
   remove(@Param('id') id: string) {
     return this.linksService.remove(id);
   }
+
+  /**
+   * TODO: user specific actions
+   */
+
+  @Get('/u/:userId')
+  getPublicLinks(@Param('userId') userId: string) {
+    return this.linksService.getPublicLinks(userId);
+  }
 }

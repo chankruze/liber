@@ -92,4 +92,23 @@ export class FoldersService {
   /**
    * TODO: user specific actions
    */
+  async getPublicLinks(userId: string) {
+    try {
+      return this.db
+        .collection(this.FOLDERS_COLLECTION)
+        .find({
+          ownerId: new ObjectId(userId),
+          isPrivate: false,
+        })
+        .toArray();
+    } catch (error) {
+      throw new UnprocessableEntityException(
+        'Unable to get folders of this user.',
+        {
+          cause: error,
+          description: error.message,
+        },
+      );
+    }
+  }
 }

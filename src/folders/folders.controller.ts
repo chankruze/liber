@@ -46,4 +46,9 @@ export class FoldersController {
   remove(@Param('id') id: string) {
     return this.foldersService.remove(id);
   }
+
+  @Get('/u/:userId')
+  getPublicLinks(@Param('userId') userId: string) {
+    return this.foldersService.getPublicLinks(userId);
+  }
 }

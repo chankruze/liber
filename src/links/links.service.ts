@@ -89,4 +89,24 @@ export class LinksService {
   /**
    * TODO: user specific actions
    */
+
+  async getPublicLinks(userId: string) {
+    try {
+      return this.db
+        .collection(this.LINKS_COLLECTION)
+        .find({
+          ownerId: new ObjectId(userId),
+          isPrivate: false,
+        })
+        .toArray();
+    } catch (error) {
+      throw new UnprocessableEntityException(
+        'Unable to get links of this user.',
+        {
+          cause: error,
+          description: error.message,
+        },
+      );
+    }
+  }
 }
