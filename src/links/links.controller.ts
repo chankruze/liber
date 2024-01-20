@@ -50,4 +50,28 @@ export class LinksController {
   getPublicLinks(@Param('userId') userId: string) {
     return this.linksService.getPublicLinks(userId);
   }
+
+  /**
+   * TODO: folder specific actions
+   */
+
+  @Patch(':id/f/:folderId')
+  addToFolder(
+    @Param('id') id: string,
+    @Param('folderId') folderId: string,
+    @Req() request: Request,
+  ) {
+    const ownerId = request['user'].sub;
+    return this.linksService.addToFolder(id, folderId, ownerId);
+  }
+
+  @Delete(':id/f/:folderId')
+  removeFromFolder(
+    @Param('id') id: string,
+    @Param('folderId') folderId: string,
+    @Req() request: Request,
+  ) {
+    const ownerId = request['user'].sub;
+    return this.linksService.removeFromFolder(id, folderId, ownerId);
+  }
 }

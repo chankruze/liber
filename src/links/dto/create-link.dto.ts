@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateLinkDto {
   @IsString()
@@ -11,4 +11,7 @@ export class CreateLinkDto {
 
   @IsBoolean()
   isPrivate: boolean;
+
+  @IsArray()
+  folderIds: string[];
 }
