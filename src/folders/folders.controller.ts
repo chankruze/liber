@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { CreateFolderDto } from './dto/create-folder.dto';
@@ -50,5 +51,10 @@ export class FoldersController {
   @Get('/u/:userId')
   getPublicFolders(@Param('userId') userId: string) {
     return this.foldersService.getPublicFolders(userId);
+  }
+
+  @Get(':id/links')
+  getLinksInFolder(@Param('id') id: string, @Query('p') p: boolean) {
+    return this.foldersService.getAllLinksOfFolder(id, p);
   }
 }

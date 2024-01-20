@@ -171,4 +171,26 @@ export class LinksService {
 
     return { ok: false };
   }
+
+  async getLinksInAFolder(
+    folderId: string,
+    options: {
+      showPrivateLinks: boolean;
+    } = { showPrivateLinks: false },
+  ) {
+    return await this.db
+      .collection(this.LINKS_COLLECTION)
+      .find({
+        folderIds: {
+          $in: [new ObjectId(folderId)],
+        },
+        isPrivate: options.showPrivateLinks,
+      })
+      .toArray();
+  }
 }
+
+// Docs //
+
+// (MongoDB)
+// |-($in): https://www.mongodb.com/docs/manual/reference/operator/query/in/#use-the--in-operator-to-match-values-in-an-array

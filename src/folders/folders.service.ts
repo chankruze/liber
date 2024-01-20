@@ -4,6 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Db, ObjectId } from 'mongodb';
+import { LinksService } from 'src/links/links.service';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto } from './dto/update-folder.dto';
 
@@ -11,7 +12,10 @@ import { UpdateFolderDto } from './dto/update-folder.dto';
 export class FoldersService {
   private readonly FOLDERS_COLLECTION = 'folders';
 
-  constructor(@Inject('MONGO_DB') private readonly db: Db) {}
+  constructor(
+    @Inject('MONGO_DB') private readonly db: Db,
+    private readonly linksService: LinksService,
+  ) {}
 
   async create(createFolderDto: CreateFolderDto, ownerId: string) {
     // TODO: 1. add check for duplicate folder name (allow only unique)
@@ -110,5 +114,9 @@ export class FoldersService {
         },
       );
     }
+  }
+
+  async getAllLinksOfFolder(id: string, showPrivateLinks: boolean = false) {
+    return this.linksService.getLinksInAFolder(id, { showPrivateLinks });
   }
 }
