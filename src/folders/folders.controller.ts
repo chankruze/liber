@@ -48,7 +48,7 @@ export class FoldersController {
   }
 
   @Get('/u/:userId')
-  getPublicLinks(@Param('userId') userId: string) {
-    return this.foldersService.getPublicLinks(userId);
+  getPublicFolders(@Param('userId') userId: string) {
+    return this.foldersService.getPublicFolders(userId);
   }
 }

@@ -92,7 +92,7 @@ export class FoldersService {
   /**
    * TODO: user specific actions
    */
-  async getPublicLinks(userId: string) {
+  async getPublicFolders(userId: string) {
     try {
       return this.db
         .collection(this.FOLDERS_COLLECTION)
