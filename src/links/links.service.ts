@@ -2,6 +2,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -44,7 +45,20 @@ export class LinksService {
     });
   }
 
-  async update(id: string, updateLinkDto: UpdateLinkDto) {
+  async update(id: string, updateLinkDto: UpdateLinkDto, userId: string) {
+    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
+    const link = await this.findOne(id);
+
+    if (!link) {
+      throw new NotFoundException('The link is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(link.ownerId)) {
+      throw new UnauthorizedException(
+        'You are not authorized to update this link.',
+      );
+    }
+
     try {
       // TODO:
 
@@ -70,7 +84,20 @@ export class LinksService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
+    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
+    const link = await this.findOne(id);
+
+    if (!link) {
+      throw new NotFoundException('The link is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(link.ownerId)) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this link.',
+      );
+    }
+
     try {
       const deleteResult = await this.db
         .collection(this.LINKS_COLLECTION)
@@ -132,14 +159,20 @@ export class LinksService {
     }
 
     // update the link with new folderId pushed into folderIds
-    const updatedLink = await this.update(id, {
-      folderIds: [
-        // TODO: improve this comment
-        // filters the existing folderIds that are not the current working folderId
-        ...link.folderIds.filter((fId) => !new ObjectId(folderId).equals(fId)),
-        new ObjectId(folderId),
-      ],
-    });
+    const updatedLink = await this.update(
+      id,
+      {
+        folderIds: [
+          // TODO: improve this comment
+          // filters the existing folderIds that are not the current working folderId
+          ...link.folderIds.filter(
+            (fId) => !new ObjectId(folderId).equals(fId),
+          ),
+          new ObjectId(folderId),
+        ],
+      },
+      userId,
+    );
 
     if (updatedLink.ok) return { ok: true };
 
@@ -159,13 +192,19 @@ export class LinksService {
     }
 
     // check if the link is already linked to the folder, then unlink
-    const updatedLink = await this.update(id, {
-      folderIds: [
-        // TODO: improve this comment
-        // filters the existing folderIds that are not the current working folderId
-        ...link.folderIds.filter((fId) => !new ObjectId(folderId).equals(fId)),
-      ],
-    });
+    const updatedLink = await this.update(
+      id,
+      {
+        folderIds: [
+          // TODO: improve this comment
+          // filters the existing folderIds that are not the current working folderId
+          ...link.folderIds.filter(
+            (fId) => !new ObjectId(folderId).equals(fId),
+          ),
+        ],
+      },
+      userId,
+    );
 
     if (updatedLink.ok) return { ok: true };
 

@@ -33,13 +33,19 @@ export class LinksController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLinkDto: UpdateLinkDto) {
-    return this.linksService.update(id, updateLinkDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateLinkDto: UpdateLinkDto,
+    @Req() request: Request,
+  ) {
+    const userId = request['user'].sub;
+    return this.linksService.update(id, updateLinkDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.linksService.remove(id);
+  remove(@Param('id') id: string, @Req() request: Request) {
+    const userId = request['user'].sub;
+    return this.linksService.remove(id, userId);
   }
 
   /**

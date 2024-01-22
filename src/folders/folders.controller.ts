@@ -39,13 +39,19 @@ export class FoldersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFolderDto: UpdateFolderDto) {
-    return this.foldersService.update(id, updateFolderDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateFolderDto: UpdateFolderDto,
+    @Req() request: Request,
+  ) {
+    const userId = request['user'].sub;
+    return this.foldersService.update(id, updateFolderDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.foldersService.remove(id);
+  remove(@Param('id') id: string, @Req() request: Request) {
+    const userId = request['user'].sub;
+    return this.foldersService.remove(id, userId);
   }
 
   @Get('/u/:userId')

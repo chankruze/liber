@@ -1,6 +1,8 @@
 import {
   Inject,
   Injectable,
+  NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Db, ObjectId } from 'mongodb';
@@ -49,7 +51,20 @@ export class FoldersService {
     });
   }
 
-  async update(id: string, updateFolderDto: UpdateFolderDto) {
+  async update(id: string, updateFolderDto: UpdateFolderDto, userId: string) {
+    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
+    const folder = await this.findOne(id);
+
+    if (!folder) {
+      throw new NotFoundException('The folder is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(folder.ownerId)) {
+      throw new UnauthorizedException(
+        'You are not authorized to update this folder.',
+      );
+    }
+
     try {
       const updatedDoc = await this.db
         .collection(this.FOLDERS_COLLECTION)
@@ -72,7 +87,20 @@ export class FoldersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
+    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
+    const folder = await this.findOne(id);
+
+    if (!folder) {
+      throw new NotFoundException('The folder is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(folder.ownerId)) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this folder.',
+      );
+    }
+
     try {
       const deleteResult = await this.db
         .collection(this.FOLDERS_COLLECTION)
