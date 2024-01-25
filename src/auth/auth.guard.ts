@@ -26,18 +26,24 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      // 💡 See this condition
-      return true;
-    }
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
-    if (!token) {
+    // if the route is not public and the user has no token,
+    // then only throw unauthorized exception
+    if (!token && !isPublic) {
       throw new UnauthorizedException();
     }
 
+    // if there is no token and the route is public then,
+    // it is a guest user request
+    if (!token && isPublic) {
+      return true;
+    }
+
+    // now we have a token and the route is public/private,
+    // in this case we should attach the user details in request
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,

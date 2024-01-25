@@ -46,13 +46,16 @@ export class LinksService {
   }
 
   async update(id: string, updateLinkDto: UpdateLinkDto, userId: string) {
-    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
     const link = await this.findOne(id);
 
+    // link availability check
     if (!link) {
       throw new NotFoundException('The link is no longer available.');
     }
 
+    // check link ownership
+    // if the request user is the owner then update
+    // else throw unauthorized error
     if (!new ObjectId(userId).equals(link.ownerId)) {
       throw new UnauthorizedException(
         'You are not authorized to update this link.',
@@ -85,13 +88,16 @@ export class LinksService {
   }
 
   async remove(id: string, userId: string) {
-    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
     const link = await this.findOne(id);
 
+    // link availability check
     if (!link) {
       throw new NotFoundException('The link is no longer available.');
     }
 
+    // check link ownership
+    // if the request user is the owner then delete
+    // else throw unauthorized error
     if (!new ObjectId(userId).equals(link.ownerId)) {
       throw new UnauthorizedException(
         'You are not authorized to delete this link.',
@@ -122,24 +128,31 @@ export class LinksService {
    * TODO: user specific actions
    */
 
-  async getPublicLinks(userId: string) {
-    try {
+  async getOnlyLinks(ownerId: string, userId: string) {
+    // check folder ownership
+    if (userId && new ObjectId(ownerId).equals(new ObjectId(userId))) {
+      // if the request user is the owner then list both public and private folders
       return this.db
         .collection(this.LINKS_COLLECTION)
-        .find({
-          ownerId: new ObjectId(userId),
-          isPrivate: false,
-        })
+        .find(
+          { ownerId: new ObjectId(ownerId), folderIds: { $size: 0 } },
+          { sort: { updatedAt: -1, createdAt: -1 } },
+        )
         .toArray();
-    } catch (error) {
-      throw new UnprocessableEntityException(
-        'Unable to get links of this user.',
-        {
-          cause: error,
-          description: error.message,
-        },
-      );
     }
+
+    // else list only public links
+    return this.db
+      .collection(this.LINKS_COLLECTION)
+      .find(
+        {
+          ownerId: new ObjectId(ownerId),
+          folderIds: { $size: 0 },
+          isPrivate: false,
+        },
+        { sort: { updatedAt: -1, createdAt: -1 } },
+      )
+      .toArray();
   }
 
   /**
@@ -217,13 +230,25 @@ export class LinksService {
       showPrivateLinks: boolean;
     } = { showPrivateLinks: false },
   ) {
+    // if the user is the owner then show all links
+    if (options.showPrivateLinks) {
+      return await this.db
+        .collection(this.LINKS_COLLECTION)
+        .find({
+          folderIds: {
+            $in: [new ObjectId(folderId)],
+          },
+        })
+        .toArray();
+    }
+
     return await this.db
       .collection(this.LINKS_COLLECTION)
       .find({
         folderIds: {
           $in: [new ObjectId(folderId)],
         },
-        isPrivate: options.showPrivateLinks,
+        isPrivate: false,
       })
       .toArray();
   }

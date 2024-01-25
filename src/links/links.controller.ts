@@ -8,6 +8,7 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
+import { Public } from 'src/auth/auth.guard';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
 import { LinksService } from './links.service';
@@ -52,9 +53,15 @@ export class LinksController {
    * TODO: user specific actions
    */
 
-  @Get('/u/:userId')
-  getPublicLinks(@Param('userId') userId: string) {
-    return this.linksService.getPublicLinks(userId);
+  @Public()
+  @Get('/u/:ownerId')
+  getOnlyLinks(@Param('ownerId') ownerId: string, @Req() request: Request) {
+    if (request['user']) {
+      const userId = request['user'].sub;
+      return this.linksService.getOnlyLinks(ownerId, userId);
+    }
+
+    return this.linksService.getOnlyLinks(ownerId, '');
   }
 
   /**

@@ -52,13 +52,16 @@ export class FoldersService {
   }
 
   async update(id: string, updateFolderDto: UpdateFolderDto, userId: string) {
-    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
     const folder = await this.findOne(id);
 
+    // folder availability check
     if (!folder) {
       throw new NotFoundException('The folder is no longer available.');
     }
 
+    // check folder ownership
+    // if the request user is the owner then update
+    // else throw unauthorized error
     if (!new ObjectId(userId).equals(folder.ownerId)) {
       throw new UnauthorizedException(
         'You are not authorized to update this folder.',
@@ -88,13 +91,16 @@ export class FoldersService {
   }
 
   async remove(id: string, userId: string) {
-    // check the folder ownership if the request user is the owner then delete else throw unauthorized error
     const folder = await this.findOne(id);
 
+    // folder availability check
     if (!folder) {
       throw new NotFoundException('The folder is no longer available.');
     }
 
+    // check folder ownership
+    // if the request user is the owner then delete
+    // else throw unauthorized error
     if (!new ObjectId(userId).equals(folder.ownerId)) {
       throw new UnauthorizedException(
         'You are not authorized to delete this folder.',
@@ -124,27 +130,47 @@ export class FoldersService {
   /**
    * TODO: user specific actions
    */
-  async getPublicFolders(userId: string) {
-    try {
+
+  async getAllFolders(ownerId: string, userId: string) {
+    // check folder ownership
+    if (userId && new ObjectId(ownerId).equals(new ObjectId(userId))) {
+      // if the request user is the owner then list both public and private folders
       return this.db
         .collection(this.FOLDERS_COLLECTION)
-        .find({
-          ownerId: new ObjectId(userId),
-          isPrivate: false,
-        })
+        .find(
+          { ownerId: new ObjectId(ownerId) },
+          { sort: { updatedAt: -1, createdAt: -1 } },
+        )
         .toArray();
-    } catch (error) {
-      throw new UnprocessableEntityException(
-        'Unable to get folders of this user.',
-        {
-          cause: error,
-          description: error.message,
-        },
-      );
     }
+
+    // else list only public folders
+    return this.db
+      .collection(this.FOLDERS_COLLECTION)
+      .find(
+        { ownerId: new ObjectId(ownerId), isPrivate: false },
+        { sort: { updatedAt: -1, createdAt: -1 } },
+      )
+      .toArray();
   }
 
-  async getAllLinksOfFolder(id: string, showPrivateLinks: boolean = false) {
-    return this.linksService.getLinksInAFolder(id, { showPrivateLinks });
+  async getAllLinksInFolder(id: string, userId: string) {
+    const folder = await this.findOne(id);
+
+    // folder availability check
+    if (!folder) {
+      throw new NotFoundException('The folder is no longer available.');
+    }
+
+    // check folder ownership
+    if (new ObjectId(userId).equals(folder.ownerId)) {
+      // if the request user is the owner then list both public and private links
+      return this.linksService.getLinksInAFolder(id, {
+        showPrivateLinks: true,
+      });
+    }
+
+    // else list only public links
+    return this.linksService.getLinksInAFolder(id);
   }
 }

@@ -3,6 +3,8 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -31,6 +33,7 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(createUserDto.password, 12);
 
+    // https://github.com/chankruze/liber/issues/16
     const newUser = await this.db.collection(this.USERS_COLLECTION).insertOne({
       handle: createUserDto.handle,
       name: createUserDto.name,
@@ -70,7 +73,19 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto, userId: string) {
+    const user = await this.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('The user is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(user._id)) {
+      throw new UnauthorizedException(
+        'You are not authorized to update this user.',
+      );
+    }
+
     try {
       const updatedDoc = await this.db
         .collection(this.USERS_COLLECTION)
@@ -93,7 +108,19 @@ export class UsersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
+    const user = await this.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('The user is no longer available.');
+    }
+
+    if (!new ObjectId(userId).equals(user._id)) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this user.',
+      );
+    }
+
     try {
       const deleteResult = await this.db
         .collection(this.USERS_COLLECTION)

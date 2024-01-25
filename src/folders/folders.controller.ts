@@ -6,9 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
 } from '@nestjs/common';
+import { Public } from 'src/auth/auth.guard';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto } from './dto/update-folder.dto';
 import { FoldersService } from './folders.service';
@@ -54,13 +54,28 @@ export class FoldersController {
     return this.foldersService.remove(id, userId);
   }
 
-  @Get('/u/:userId')
-  getPublicFolders(@Param('userId') userId: string) {
-    return this.foldersService.getPublicFolders(userId);
+  /**
+   * TODO: user specific actions
+   */
+
+  @Public()
+  @Get('/u/:ownerId')
+  getAllFolders(@Param('ownerId') ownerId: string, @Req() request: Request) {
+    if (request['user']) {
+      const userId = request['user'].sub;
+      return this.foldersService.getAllFolders(ownerId, userId);
+    }
+
+    return this.foldersService.getAllFolders(ownerId, '');
   }
 
+  /**
+   * TODO: link specific actions
+   */
+
   @Get(':id/links')
-  getLinksInFolder(@Param('id') id: string, @Query('p') p: boolean) {
-    return this.foldersService.getAllLinksOfFolder(id, p);
+  getLinksInFolder(@Param('id') id: string, @Req() request: Request) {
+    const userId = request['user'].sub;
+    return this.foldersService.getAllLinksInFolder(id, userId);
   }
 }
