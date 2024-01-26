@@ -1,12 +1,14 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginUserDto } from './dto/login-user.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
@@ -34,9 +36,14 @@ export class AuthService {
       if (_isValid) {
         const payload = { sub: userExists._id, email: userExists.email };
 
-        return {
-          access_token: await this.jwtService.signAsync(payload),
-        };
+        const accessToken = await this.jwtService.signAsync(payload);
+        const refreshToken = await this.jwtService.signAsync(payload, {
+          expiresIn: '1y',
+        });
+
+        // TODO: save in db/redis
+
+        return { accessToken, refreshToken };
       }
 
       // TODO: log this unauthorized access attempt against user's log profile
@@ -44,5 +51,32 @@ export class AuthService {
     }
 
     throw new NotFoundException(`No user found with ${loginUserDto.email}`);
+  }
+
+  async refresh(refreshTokenDto: RefreshTokenDto) {
+    // Verify the refresh token
+    try {
+      const { sub, email } = await this.jwtService.verifyAsync(
+        refreshTokenDto.refreshToken,
+      );
+
+      const payload = { sub, email };
+
+      // TODO: delete the old refresh token from db/redis
+
+      // Generate new tokens
+      const accessToken = await this.jwtService.signAsync(payload);
+      const refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '1y',
+      });
+
+      // TODO: store new tokens in db/redis
+
+      return { accessToken, refreshToken };
+    } catch (e) {
+      if (e instanceof JsonWebTokenError) {
+        throw new ForbiddenException('Invalid refresh token');
+      }
+    }
   }
 }
