@@ -20,4 +20,8 @@ export class HandlesService {
 
     return { isAvailable: true };
   }
+
+  async getUserDetails(checkHandleDto: CheckHandleDto) {
+    return await this.usersService.findByHandle(checkHandleDto.handle);
+  }
 }

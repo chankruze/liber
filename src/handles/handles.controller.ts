@@ -10,7 +10,13 @@ export class HandlesController {
 
   @Public()
   @Get(':handle')
-  findOne(@Param() checkHandleDto: CheckHandleDto) {
+  checkHandleAvailability(@Param() checkHandleDto: CheckHandleDto) {
     return this.handlesService.checkAvailability(checkHandleDto);
+  }
+
+  @Public()
+  @Get(':handle/details')
+  getUserDetails(@Param() checkHandleDto: CheckHandleDto) {
+    return this.handlesService.getUserDetails(checkHandleDto);
   }
 }

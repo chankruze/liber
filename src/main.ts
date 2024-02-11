@@ -6,6 +6,8 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 
+const PORT = process.env.PORT || 6767;
+
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -17,7 +19,7 @@ async function bootstrap() {
       transform: true, // transform payloads to be objects typed according to their DTO classes
     }),
   );
-  await app.listen(3000, '0.0.0.0'); // specify '0.0.0.0' in the listen() for all hosts
+  await app.listen(PORT, '0.0.0.0'); // specify '0.0.0.0' in the listen() for all hosts
 }
 
 bootstrap();
