@@ -4,17 +4,7 @@ import { UsersService } from './users.service';
 
 @Module({
   controllers: [UsersController],
-  providers: [
-    UsersService,
-    {
-      provide: 'DICEBEAR_CORE',
-      useFactory: async () => await import('@dicebear/core'),
-    },
-    {
-      provide: 'DICEBEAR_COLLECTION',
-      useFactory: async () => await import('@dicebear/collection'),
-    },
-  ],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}

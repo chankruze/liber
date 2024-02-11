@@ -8,8 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { DbModule } from './db/db.module';
 import { FoldersModule } from './folders/folders.module';
 import { HandlesModule } from './handles/handles.module';
-import { UsersModule } from './users/users.module';
 import { LinksModule } from './links/links.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [

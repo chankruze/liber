@@ -16,12 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   private readonly USERS_COLLECTION = 'users';
 
-  constructor(
-    @Inject('MONGO_DB') private readonly db: Db,
-    @Inject('DICEBEAR_CORE') private readonly dicebearCore: any,
-    @Inject('DICEBEAR_COLLECTION')
-    private readonly dicebearCollection: any,
-  ) {}
+  constructor(@Inject('MONGO_DB') private readonly db: Db) {}
 
   async create(createUserDto: CreateUserDto, ip: string) {
     const { email, handle, name } = createUserDto;
@@ -38,18 +33,12 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(createUserDto.password, 12);
 
-    const avatar = await this.dicebearCore
-      .createAvatar(this.dicebearCollection.openPeeps, {
-        size: 192,
-      })
-      .toDataUri();
-
     // https://github.com/chankruze/liber/issues/16
     const newUser = await this.db.collection(this.USERS_COLLECTION).insertOne({
       handle,
       name,
       email,
-      avatar,
+      avatar: `https://api.dicebear.com/7.x/thumbs/svg?seed=${handle}&size=192`,
       bio: `Hey there! I am using liber.`,
       password: passwordHash,
       ip,
