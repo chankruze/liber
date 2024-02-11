@@ -19,7 +19,7 @@ export class UsersService {
   constructor(@Inject('MONGO_DB') private readonly db: Db) {}
 
   async create(createUserDto: CreateUserDto, ip: string) {
-    const { email } = createUserDto;
+    const { email, handle, name } = createUserDto;
 
     // check in db if the user already exists
     const userExists = await this.db.collection(this.USERS_COLLECTION).findOne({
@@ -35,8 +35,8 @@ export class UsersService {
 
     // https://github.com/chankruze/liber/issues/16
     const newUser = await this.db.collection(this.USERS_COLLECTION).insertOne({
-      handle: createUserDto.handle,
-      name: createUserDto.name,
+      handle,
+      name,
       email,
       password: passwordHash,
       ip,
@@ -45,14 +45,21 @@ export class UsersService {
     });
 
     if (newUser.acknowledged) {
-      return { ok: true, _id: newUser.insertedId };
+      return {
+        ok: true,
+        id: newUser.insertedId,
+        ...createUserDto,
+      };
     }
 
     throw new InternalServerErrorException('Unable to create a user');
   }
 
   async findAll() {
-    return await this.db.collection(this.USERS_COLLECTION).find().toArray();
+    return await this.db
+      .collection(this.USERS_COLLECTION)
+      .find({}, { projection: { password: 0, ip: 0 } })
+      .toArray();
   }
 
   async findOne(id: string) {
@@ -62,15 +69,15 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return await this.db.collection(this.USERS_COLLECTION).findOne({
-      email,
-    });
+    return await this.db
+      .collection(this.USERS_COLLECTION)
+      .findOne({ email }, { projection: { ip: 0 } });
   }
 
   async findByHandle(handle: string) {
-    return await this.db.collection(this.USERS_COLLECTION).findOne({
-      handle,
-    });
+    return await this.db
+      .collection(this.USERS_COLLECTION)
+      .findOne({ handle }, { projection: { name: 1, _id: 0 } });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, userId: string) {
